@@ -513,6 +513,11 @@ void lease_update_dns(int force)
 	  if (!option_bool(OPT_DHCP_FQDN) && lease->hostname)
 	    cache_add_dhcp_entry(lease->hostname, prot, (struct all_addr *)&lease->addr, lease->expires);
 #endif
+          if (lease->hwaddr_len == 6) {
+            char mactld[17];
+            snprintf(mactld, sizeof(mactld), "%02x%02x%02x%02x%02x%02x.mac", lease->hwaddr[0], lease->hwaddr[1], lease->hwaddr[2], lease->hwaddr[3], lease->hwaddr[4], lease->hwaddr[5]);
+            cache_add_dhcp_entry(mactld, prot, (struct all_addr *)&lease->addr, lease->expires);
+          }
 	}
       
       dns_dirty = 0;

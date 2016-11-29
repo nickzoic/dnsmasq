@@ -666,7 +666,8 @@ struct dhcp_lease {
   unsigned int length;
 #endif
   int hwaddr_len, hwaddr_type;
-  unsigned char hwaddr[DHCP_CHADDR_MAX]; 
+  unsigned char hwaddr[DHCP_CHADDR_MAX];
+  char hwaddr_string[DHCP_CHADDR_MAX*2+5];
   struct in_addr addr, override, giaddr;
   unsigned char *extradata;
   unsigned int extradata_len, extradata_size;

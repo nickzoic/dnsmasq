@@ -15,7 +15,6 @@
 */
 
 #include "dnsmasq.h"
-
 #ifdef HAVE_DHCP
 
 static struct dhcp_lease *leases = NULL, *old_leases = NULL;
@@ -513,11 +512,7 @@ void lease_update_dns(int force)
 	  if (!option_bool(OPT_DHCP_FQDN) && lease->hostname)
 	    cache_add_dhcp_entry(lease->hostname, prot, (struct all_addr *)&lease->addr, lease->expires);
 #endif
-          if (lease->hwaddr_len == 6) {
-            char mactld[17];
-            snprintf(mactld, sizeof(mactld), "%02x%02x%02x%02x%02x%02x.mac", lease->hwaddr[0], lease->hwaddr[1], lease->hwaddr[2], lease->hwaddr[3], lease->hwaddr[4], lease->hwaddr[5]);
-            cache_add_dhcp_entry(mactld, prot, (struct all_addr *)&lease->addr, lease->expires);
-          }
+          cache_add_dhcp_entry(lease->hwaddr_string, prot, (struct all_addr *)&lease->addr, lease->expires);
 	}
       
       dns_dirty = 0;
@@ -841,8 +836,13 @@ void lease_set_hwaddr(struct dhcp_lease *lease, const unsigned char *hwaddr,
       hw_type != lease->hwaddr_type || 
       (hw_len != 0 && memcmp(lease->hwaddr, hwaddr, hw_len) != 0))
     {
-      if (hw_len != 0)
+      if (hw_len != 0) {
 	memcpy(lease->hwaddr, hwaddr, hw_len);
+        for (int i=0; i<hw_len; i++)
+          sprintf((lease->hwaddr_string)+i*2, "%02x", lease->hwaddr[i]);
+        memcpy((lease->hwaddr_string)+hw_len*2, ".mac", 5);
+      }
+        
       lease->hwaddr_len = hw_len;
       lease->hwaddr_type = hw_type;
       lease->flags |= LEASE_CHANGED;
